@@ -1,0 +1,71 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert'),path=require('path');
+const source=name=>fs.readFileSync(path.join(__dirname,'..',name),'utf8');
+class Element{constructor(){this.value='';this.checked=false;this.hidden=false;this.style={};this.dataset={};this.innerHTML='';this.textContent='';this.classList={toggle(){},contains(){return false;}};}querySelector(){return null;}querySelectorAll(){return [];}setAttribute(){}addEventListener(){}scrollIntoView(){}getBoundingClientRect(){return {width:300,height:300,left:0,top:0};}getContext(){return {setTransform:()=>{this.canvasResizes=(this.canvasResizes||0)+1;},beginPath(){},moveTo(){},lineTo(){},stroke(){}};}}
+const els=new Map(),filters=['all','practice','later','known','unselected'].map(f=>{const e=new Element();e.dataset.filter=f;return e;});
+const document={querySelector(s){if(!els.has(s))els.set(s,new Element());return els.get(s);},querySelectorAll(s){return s==='#card-library-filters [data-filter]'?filters:[];}};
+const get=s=>document.querySelector(s);get('#card-filter').value='practice';get('#card-sort').value='added';get('#card-limit').value='20';get('#show-guide').checked=true;
+const stored={},localStorage={getItem:k=>stored[k]??null,setItem:(k,v)=>{stored[k]=v;}};
+const window={devicePixelRatio:1,addEventListener(){},createStoryUI(options){window.storyOptions=options;return {refresh(){},stop(){}};}};
+const context=vm.createContext({window,document,localStorage,console,alert(){},Map,Set,Math,JSON});
+for(const name of ['content.js','content-ko.js','extra-set-02.js','mnemonic-data.js','set05-mnemonics.js','component-meanings.js','hanja-readings.js','component-structure.js','mnemonic-ui.js','example-sentences.js','example-manual.js','app.js'])vm.runInContext(source(name),context,{filename:name});
+assert.equal(window.KANJI_DATA.kanji.length,50);
+assert(get('#kanji-detail').innerHTML.includes('巡回します'),'예문은 단어 아래에 표시됩니다');
+assert(get('#kanji-detail').innerHTML.includes('돌 순'),'한국 한자 음훈을 표시합니다');
+assert(!get('#kanji-detail').innerHTML.includes('역사적 유래'));assert(!get('#kanji-detail').innerHTML.includes('기억 힌트'));
+get('#meaning-toggle').onclick({currentTarget:get('#meaning-toggle')});assert(!get('#kanji-grid').innerHTML.includes('돌다; 순회하다'));assert(!get('#kanji-detail').innerHTML.includes('돌다; 순회하다'));assert(!get('#kanji-detail').innerHTML.includes('순회; 순찰'));get('#meaning-toggle').onclick({currentTarget:get('#meaning-toggle')});assert(get('#kanji-detail').innerHTML.includes('돌다; 순회하다'));
+assert(get('#flashcard').disabled,'선택 전 연습 카드는 비어 있어야 합니다');
+get('#mark-known').onclick();assert.equal(JSON.parse(stored['kanji-notebook-card-status-v2'])['巡'],'known');assert(get('#kanji-grid').innerHTML.includes('tile-known'));
+get('#mark-review').onclick();assert.equal(JSON.parse(stored['kanji-notebook-card-status-v2'])['巡'],'review');assert(get('#kanji-grid').innerHTML.includes('tile-review'));
+window.storyOptions.onFlag('巡');
+assert.match(get('#card-count').textContent,/1 \/ 2/,'한자 하나에 두 단어 카드가 있어야 합니다');
+assert(get('#flashcard').innerHTML.includes('巡る'),'앞면에 단어가 있어야 합니다');
+get('#flashcard').onclick();assert(get('#flashcard').innerHTML.includes('めぐる'),'뒷면에 단어 읽기가 있어야 합니다');
+get('#later').onclick();assert.match(get('#card-count').textContent,/1 \/ 1/,'한 단어만 나중에로 옮겨야 합니다');
+assert.equal(JSON.parse(stored['kanji-notebook-word-status-v1'])['巡:0'],'later');
+assert(get('#kanji-grid').innerHTML.includes('tile-practice'),'혼합 상태에서 남은 연습 색이 표시되어야 합니다');
+get('#later').onclick();assert(get('#flashcard').disabled);
+get('#card-filter').value='later';get('#card-filter').onchange();assert.match(get('#card-count').textContent,/1 \/ 2/);
+get('#known').onclick();assert.equal(JSON.parse(stored['kanji-notebook-word-status-v1'])['巡:0'],'known');
+assert.match(get('#card-count').textContent,/1 \/ 1/);
+get('#card-filter').value='known';get('#card-filter').onchange();assert.match(get('#card-count').textContent,/1 \/ 1/);
+get('#remove-card').onclick();assert(get('#flashcard').disabled);
+get('#card-filter').value='all';get('#card-limit').value='25';get('#card-filter').onchange();assert.match(get('#card-count').textContent,/1 \/ 50/,'25자 세트는 50 단어여야 합니다');
+get('#card-limit').value='10';get('#card-limit').onchange();assert.match(get('#card-count').textContent,/1 \/ 20/,'10자는 두 단어씩 20장이어야 합니다');
+const first=get('#flashcard').innerHTML;get('#next-batch').onclick();assert.notEqual(get('#flashcard').innerHTML,first,'다음 묶음은 다음 단어부터 시작해야 합니다');
+get('#card-set').value='1';get('#card-set').onchange();assert(!get('#flashcard').innerHTML.includes('巡る'),'다른 세트의 단어를 보여야 합니다');
+get('#set-complete').checked=true;get('#set-complete').onchange({target:get('#set-complete')});assert(JSON.parse(stored['kanji-notebook-completed-sets-v1'])['0']);
+filters.find(f=>f.dataset.filter==='later').onclick();assert(get('#card-library-list').innerHTML.includes('해당 상태의 한자가 없습니다.'));
+const canvasResizes=get('#writing-canvas').canvasResizes;get('#show-guide').checked=false;get('#show-guide').onchange();assert(get('#write-search').hidden&&get('#write-select').hidden&&get('#write-set-picker').hidden);assert(!get('#write-guide').innerHTML.includes('巡'));assert(get('#write-guide').innerHTML.includes('□'));assert(get('#write-guide').innerHTML.includes('めぐる'));assert.equal(get('#trace-char').style.display,'none');
+get('#show-guide').checked=true;get('#show-guide').onchange();assert(!get('#write-search').hidden&&!get('#write-select').hidden);assert(get('#write-guide').innerHTML.includes('巡る'));assert.equal(get('#writing-canvas').canvasResizes,canvasResizes,'안내를 켜고 꺼도 이미 쓴 획을 지우면 안 됩니다');
+// A shuffled deck is grouped by kanji and paged without splitting or repeating them.
+get('#card-set').value='0';get('#card-set').onchange();get('#card-filter').value='all';get('#card-sort').value='shuffle';get('#card-limit').value='10';get('#card-filter').onchange();
+const word=()=>get('#flashcard').innerHTML.match(/class="flash-kanji flash-word" lang="ja">([^<]+)/)[1];
+const cardChar=()=>{get('#flashcard').onclick();const c=get('#flashcard').innerHTML.match(/학습 한자 ([^<]+)/)[1];get('#flashcard').onclick();return c;};
+const firstBatch=new Set();for(let i=0;i<20;i++){firstBatch.add(cardChar());get('#next').onclick();}assert.equal(firstBatch.size,10);
+get('#next-batch').onclick();for(let i=0;i<20;i++){assert(!firstBatch.has(cardChar()),'무작위 다음 묶음은 이전 한자를 반복하지 않아야 합니다');get('#next').onclick();}
+// Moving a word out of a category does not refill the current batch; the next
+// batch must still be available and must use the selected category.
+window.storyOptions.onFlag('企');get('#card-filter').value='practice';get('#card-sort').value='added';get('#card-limit').value='1';get('#card-filter').onchange();
+assert.equal(word(),'企画');get('#later').onclick();assert.equal(word(),'企業','같은 한자의 다른 단어는 유지됩니다');
+assert.match(get('#card-count').textContent,/1 \/ 1/);get('#next-batch').onclick();assert.equal(word(),'企業');assert.equal(get('#card-filter').value,'practice');
+// A multi-set selection keeps the limit in distinct kanji while mixing word cards individually.
+const checkbox=(name,index,checked)=>({target:{matches:s=>s===`[data-${name}-set]`,dataset:{[`${name}Set`]:String(index)},checked}});
+get('#card-set-options').onchange(checkbox('card',1,true));
+assert.equal(get('#card-set-summary').textContent,'전체 세트');
+get('#card-filter').value='all';get('#card-limit').value='25';get('#card-sort').value='added';
+let seed=12345;const oldRandom=Math.random;Math.random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
+const takeBatch=()=>{const list=[];for(let i=0;i<50;i++){list.push(`${cardChar()}:${word()}`);get('#next').onclick();}return list;};
+get('#shuffle').onclick();assert.equal(get('#card-sort').value,'shuffle');const mix1=takeBatch();
+assert.equal(new Set(mix1).size,50,'each eligible word appears exactly once in a 25-kanji batch');
+assert(mix1.every((item,i)=>i===0||item.split(':')[0]!==mix1[i-1].split(':')[0]),'same-kanji word cards are separated when feasible');
+get('#shuffle').onclick();const mix2=takeBatch();assert.notDeepEqual(mix1,mix2,'randomize produces a fresh card order');
+Math.random=()=>0;get('#shuffle').onclick();const repeated1=takeBatch();get('#shuffle').onclick();const repeated2=takeBatch();assert.notDeepEqual(repeated1,repeated2,'even a repeated random sequence changes the visible card order');
+Math.random=oldRandom;
+get('#card-set-clear').onclick();assert.equal(get('#card-count').textContent,'카드가 없습니다');
+get('#card-set-all').onclick();assert.equal(get('#card-set-summary').textContent,'전체 세트');
+get('#write-set-options').onchange(checkbox('write',1,true));
+assert(get('#write-select').innerHTML.includes('巡')&&get('#write-select').innerHTML.includes('嵐'),'writing combines selected sets');
+get('#set-complete').onchange({target:{checked:true}});assert.equal(get('#write-set-summary').textContent,'전체 세트','completion refresh preserves multi-selection');
+get('#write-set-clear').onclick();assert(get('#write-select').innerHTML.includes('검색 결과 없음'));
+window.storyOptions.onNavigateKanji({char:'嵐',setNumber:2});assert.equal(get('#set-select').value,'1','story link opens the correct set');assert(get('#kanji-detail').innerHTML.includes('嵐'),'story link opens the matching kanji');
+console.log('단어 카드, 개별 상태, 세트 및 장수, 색상, 완료 표시, 쓰기 빈칸 확인 완료');

@@ -1,0 +1,27 @@
+
+.mnemonic-card{margin:18px 0;padding:16px;background:#f5f8f2;border:1px solid #dce8d8;border-radius:10px}
+.mnemonic-heading{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.mnemonic-heading{cursor:pointer;list-style:none}.mnemonic-heading::-webkit-details-marker{display:none}.mnemonic-heading:focus-visible{outline:3px solid #d5a449;outline-offset:4px}.mn-toggle:after{content:' · 펼치기 ▾'}.mnemonic-card[open]>.mnemonic-heading .mn-toggle:after{content:' · 접기 ▴'}.mnemonic-content{padding-top:4px}
+.mnemonic-heading .detail-label{margin:0}
+.mn-caption{display:block;color:#536f5c;font-size:11px;margin-top:14px}
+.mn-badge{font-size:10px;font-weight:600;color:#54725e;background:#e6efe1;padding:5px 7px;border-radius:30px}
+.mnemonic-parts{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.mn-part{font-size:12px;color:#37564c;background:white;border:1px solid #d8e4d4;border-radius:6px;padding:6px 9px}
+.mnemonic-story{font-size:13px!important;line-height:1.8;color:#2e4d3f!important;margin:12px 0}
+.mn-origin{font-size:11px!important;line-height:1.65;color:#758c7b!important}
+.mn-origin a{color:#2c6959;text-decoration:underline}
+.mn-edit{border-top:1px solid #dce6dc;margin-top:10px;padding-top:9px}
+.mn-edit summary{cursor:pointer;color:#365f4f;font-size:12px;font-weight:600}
+.mn-edit textarea{display:block;resize:vertical;min-height:78px}
+.mn-edit label,.mn-edit small{display:block;font-size:11px;color:#789181;margin-top:9px}
+.mn-edit textarea{width:100%;box-sizing:border-box;margin:8px 0;font-family:inherit;font-size:13px;line-height:1.5;padding:10px;border:1px solid #b5ceb8;border-radius:6px;background:#fff;color:#294739}
+.mn-edit button{margin:5px 0}
+.featured-novel{margin:16px 0 18px;padding:18px;background:#eff6ed;border:1px solid #ccdfc9;border-radius:12px}
+.featured-novel h4{font-size:21px;font-weight:600;margin:6px 0 8px;color:#294b3f}
+.featured-novel>p:not(.section-kicker){color:#54725e;font-size:12px;margin:5px 0 12px}
+.novel-shortcuts,.novel-chapter-nav{display:flex;flex-wrap:wrap;gap:6px}
+.novel-shortcuts button,.novel-chapter-nav button{border:1px solid #b7d0bb;border-radius:20px;padding:7px 12px;background:#fff;color:#476d55;cursor:pointer;font-size:12px}
+.novel-shortcuts button.active,.novel-chapter-nav button[aria-current=true]{background:#456e56;border-color:#456e56;color:#fff}
+.novel-chapter-nav{margin:14px 0}
+.novel-complete{margin:2px 0 14px!important}
+.component-tree,.component-inner ul{list-style:none;margin:10px 0;padding:0}.component-inner ul{padding-left:15px;border-left:1px solid #cadccc}.component-node{display:flex;flex-direction:column;gap:3px;margin:10px 0;color:#587261;font-size:12px;line-height:1.6}.component-shape{color:#304e3c}.component-shape b{font-size:16px}.component-inner summary{cursor:pointer;color:#4e795b;font-size:11px}.component-source{font-size:10px;color:#8c9c90;margin-top:10px}.reading-background{margin:10px 0 15px;color:#71877a;font-size:11px;line-height:1.7}.reading-background summary{cursor:pointer;color:#52735d;font-weight:700}.reading-background p{margin:7px 0}.korean-hanja{font-size:11px!important;color:#62826b!important;line-height:1.6;margin:5px 0!important}

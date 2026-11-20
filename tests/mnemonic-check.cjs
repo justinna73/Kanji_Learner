@@ -1,0 +1,11 @@
+const assert=require('assert');global.window=global;
+const stored={'kanji-notebook-personal-mnemonics-v1':'{"肌":"내 메모"}'};global.localStorage={getItem:k=>stored[k]||null,setItem:(k,v)=>{stored[k]=v;}};
+require('../content.js');require('../content-ko.js');for(let n=2;n<=45;n++)require(`../extra-set-${String(n).padStart(2,'0')}.js`);
+require('../component-meanings.js');require('../hanja-readings.js');require('../component-structure.js');require('../mnemonic-ui.js');
+const ui=createMnemonicUI(),byChar=new Map(KANJI_DATA.kanji.map(k=>[k.char,k]));
+const skin=ui.view(byChar.get('肌'));assert.match(skin,/왼쪽 <b lang="ja">月 \(기본 모양: 肉\)/);assert.match(skin,/오른쪽 <b lang="ja">几/);assert.match(skin,/소리/);assert(!skin.includes('기억 힌트'));assert(!skin.includes('역사적 유래'));assert(!skin.includes('나만의 기억 이야기'));assert(!skin.includes('부품의 독립적인 뜻을 합치면'));
+assert.equal(stored['kanji-notebook-personal-mnemonics-v1'],'{"肌":"내 메모"}','기존 메모를 지우지 않습니다');
+const rain=ui.view(byChar.get('涙'));assert(rain.includes('더 작게 보기'),'상위 부품을 더 분해할 수 있습니다');
+const events={},card={open:true,addEventListener:(name,fn)=>events[name]=fn};ui.bind({querySelector:()=>card},'涙');events.toggle();assert.match(ui.view(byChar.get('涙')),/<details class="mnemonic-card" open/);
+assert(Object.keys(KANJI_COMPONENT_STRUCTURE).length>=1500);assert.deepEqual(KOREAN_HANJA_READINGS['肌'].labels,['살 기']);assert(KOREAN_HANJA_READINGS['涙'].labels.includes('눈물 누'));assert.equal(KOREAN_HANJA_READINGS['涙'].variant,'淚');assert(!KOREAN_HANJA_READINGS['込']);
+console.log('Nested components, Korean labels, fold state and preserved notes passed');
